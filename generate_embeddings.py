@@ -22,22 +22,34 @@ ids, sequences = read_fasta(sequences_url)
 embeddings_array = np.zeros((len(sequences), 1024))
 gene_names = []
 
+# count the number of sequences with length > 5994
+count = 0
+for i in range(len(sequences)):
+    if len(sequences[i]) > 5994:
+        count += 1
+print(count)
+exit()
+
 parameters, forward_fn, tokenizer, config = get_pretrained_model(
         model_name="500M_multi_species_v2",
             embeddings_layers_to_save=(24,),
                 max_positions=1000,
                 )
 
+tokens_ids = [b[1] for b in tokenizer.batch_tokenize(sequences)]
+tokens_str = [b[0] for b in tokenizer.batch_tokenize(sequences)]
+
 forward_fn = hk.transform(forward_fn)
+exit()
 for i in tqdm(range(4, len(sequences), 4)):
     #print("iter:", i)
     #gene_names.append(gene_id.split('.')[0])
-    sequence = sequences[i-4:i]
     [gene_names.append(x.split(".")[0]) for x in ids[i-4:i]] 
+    sequence = sequences[i-4:i]
     sequence = [s[:5994] if len(s) > 5994 else s for s in sequence]
     #print(mean_embeddings.shape)
-    tokens_ids = [b[1] for b in tokenizer.batch_tokenize(sequence)]
-    tokens_str = [b[0] for b in tokenizer.batch_tokenize(sequence)]
+    
+    
 
     tokens = jnp.asarray(tokens_ids, dtype=jnp.int32)
 
